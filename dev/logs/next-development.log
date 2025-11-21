@@ -1,0 +1,4 @@
+[00:01:11.977] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/Users/juliey/timbits/timbits/app'
+[00:01:11.982] Server  ERROR    ⨯ "unhandledRejection:" Error: ENOENT: no such file or directory, scandir '/Users/juliey/timbits/timbits/app'
+[00:01:11.985] Server  ERROR    ⨯ "unhandledRejection: " Error: ENOENT: no such file or directory, scandir '/Users/juliey/timbits/timbits/app'
+[00:01:11.985] Server  LOG      ✓ Compiled in 137ms
