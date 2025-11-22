@@ -1,0 +1,8 @@
+
+[
+    { "category": "Brewed Coffee", "name": "Regular Coffee Small", "calories": 70},
+    { "category": "Brewed Coffee", "name": "Regular Coffee Medium", "calories": 100},
+    { "category": "Brewed Coffee", "name": "Regular Coffee Large", "calories": 120},
+    { "category": "Brewed Coffee", "name": "Regular Coffee X-Large", "calories": 150},
+    { "category": "Espresso Beverages", "name": "Cappuccino Small", "calories": 80}
+]

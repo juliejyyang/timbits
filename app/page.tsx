@@ -1,10 +1,18 @@
 import './styling.css';
 
+function SearchBar() {
+  return(
+    <form>
+      <input type='text' placeholder='place your order!' className='input_box'/>
+    </form>
+  )
+}
+
 function MyOrder() {
   return (
     <div className="container">
-      <h1 className="header">My Order</h1>
-      <input type="text" className="input_box"/>
+      <h1>My order:</h1>
+      <SearchBar />
     </div>
   )
 }
