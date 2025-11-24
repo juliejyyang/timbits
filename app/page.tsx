@@ -1,9 +1,10 @@
+'use client';
 import { useState } from 'react';
 import './styling.css';
 
 function SearchBar() {
   const [item, setSearchItem] = useState('') // const [state, setState] = useState(initialState)
-  const [result, setResults] = useState([])
+  const [results, setResults] = useState([])
 
   const handleSearch=async (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchedItem = e.target.value
@@ -15,7 +16,7 @@ function SearchBar() {
     }
 
     try {
-      const res = await fetch(`http://localhost:8000/api/search?query=${searchedItem}`) // res=response of the api call
+      const res = await fetch(`http://localhost:8000/api/search?item=${searchedItem}`) // res=response of the api call
       const items = await res.json() // Converts the response body from JSON string to JavaScript object/array, await waits for parsing to complete
       setResults(items) // Saves the items to state. Component re-renders and displays the results
     } catch (error){
@@ -23,11 +24,24 @@ function SearchBar() {
     }
   }
 
-  
-  return(
-    <form>
-      <input type='text' placeholder='place your order!' className='input_box'/>
-    </form>
+    return (
+    <div>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <input type='text' placeholder='place your order!' className='input_box' value={item} onChange={handleSearch}/>
+      </form>
+      
+      {/* Display search results */}
+      {results.length > 0 && (
+        <div className="search-results">
+          {results.map((menuItem: any) => (
+            <div key={menuItem.id} className="results-item">
+              <span>{menuItem.name}</span>
+              <span>{menuItem.calories} cal</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
