@@ -2,9 +2,10 @@ from sqlalchemy import create_engine, DateTime, func, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy import Column, Integer, String
+from dotenv import load_dotenv
 import os
 
-
+load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
