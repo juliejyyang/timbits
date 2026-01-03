@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import './styling.css';
+import {Login} from './login'
 
 type MenuItem = {
   id: number;
@@ -100,9 +101,13 @@ function CurrentOrder({
     }
 
     try {
+      const token = localStorage.getItem('access_token');
       const res = await fetch('http://localhost:8000/api/orders', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           items: orderItems.map(item => ({
             name: item.name,
@@ -164,7 +169,7 @@ function OrderHistory({ orders }: { orders: PastOrder[] }) {
             <ul>
               {order.items.map((item) => (
                 <li key={item.id}>
-                  {item.name} - {item.calories} cal (x{item.quantity})
+                  {item.name} - {item.calories} cal
                 </li>
               ))}
             </ul>
@@ -176,40 +181,89 @@ function OrderHistory({ orders }: { orders: PastOrder[] }) {
 }
 
 export default function MyNextFastAPIApp() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [orderItems, setOrderItems] = useState<MenuItem[]>([]);
   const [totalCals, setTotalCals] = useState(0);
   const [pastOrders, setPastOrders] = useState<PastOrder[]>([]);
 
-  function handleSetTotalCals(cals: number) {
-    setTotalCals((prev) => prev + cals);
-  }
-
-  // Fetch order history on component mount
-  const fetchOrderHistory = async () => {
-    try {
-      const res = await fetch('http://localhost:8000/api/orders');
-      const data = await res.json();
-      setPastOrders(data);
-    } catch (error) {
-      console.error('Failed to fetch order history:', error);
+  //check if use is already logged in
+  useEffect( () => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      setIsAuthenticated(true);
     }
-  };
-
-  useEffect(() => {
-    fetchOrderHistory();
   }, []);
 
-  const handleOrder = (menuItem: MenuItem) => {
-    setOrderItems((prev) => [...prev, menuItem]);
-    handleSetTotalCals(menuItem.calories ?? 0);
-  }
+  // Fetch order history when authenticated
+  useEffect(() => {
+    const fetchOrderHistory = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('http://localhost:8000/api/orders', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
 
-  const handleOrderSaved = () => {
-    // Clear current order
-    setOrderItems([]);
-    setTotalCals(0);
-    // Refresh order history
+        if (!res.ok) {
+          throw new Error('Failed to fetch orders');
+        }
+
+        const data = await res.json();
+        setPastOrders(data);
+      }catch (error) {
+        console.error('Failed to fetch order history', error);
+      }
+  };
+
+  if (isAuthenticated) {
     fetchOrderHistory();
+  }
+}, [isAuthenticated]);
+
+const handleLogin = () => {
+  setIsAuthenticated(true);
+};  
+
+const handleLogout = () => {
+  localStorage.removeItem('access_token')
+  setIsAuthenticated(false);
+  setOrderItems([]);
+  setTotalCals(0);
+  setPastOrders([]);
+}
+
+const handleOrder = (menuItem: MenuItem) => {
+  setOrderItems((prev) => [...prev, menuItem]);
+  setTotalCals((prev) => prev + (menuItem.calories ?? 0));
+}
+
+const handleOrderSaved = async () => {
+  // Clear current order
+  setOrderItems([]);
+  setTotalCals(0);
+
+  //refresh order history
+  try {
+    const token = localStorage.getItem('access_token');
+    const res = await fetch('http://localhost:8000/api/orders', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setPastOrders(data);
+    }
+  } catch (error) {
+    console.error('Failed to refresh order history', error);
+  }
+};
+
+  //if not authenticated, show the login page
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />;
   }
 
   const titleStyle = {
@@ -221,6 +275,9 @@ export default function MyNextFastAPIApp() {
   return (
     <div>
       <h1 className="title" style={titleStyle}>Tim-Bits</h1>
+      <button onClick={handleLogout} className="logout">
+        Logout
+      </button>
       <MyOrder onItemClick={handleOrder}/>
       <CurrentOrder orderItems={orderItems} totalCals={totalCals} onOrderSaved={handleOrderSaved}/>
       <OrderHistory orders={pastOrders}/>
